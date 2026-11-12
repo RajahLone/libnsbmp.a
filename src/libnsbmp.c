@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include <ldg.h>
 #include <libnsbmp.h>
 
 #include "utils/log.h"
@@ -321,7 +322,7 @@ static bmp_result bmp_info_header_parse(bmp_image *bmp, uint8_t *data)
                         return BMP_INSUFFICIENT_DATA;
 
                 /* create the colour table */
-                bmp->colour_table = (uint32_t *)malloc(bmp->colours * 4);
+                bmp->colour_table = (uint32_t *)ldg_Malloc(bmp->colours * 4);
                 if (!bmp->colour_table)
                         return BMP_INSUFFICIENT_MEMORY;
                 for (i = 0; i < bmp->colours; i++) {
@@ -348,7 +349,7 @@ static bmp_result bmp_info_header_parse(bmp_image *bmp, uint8_t *data)
         bmp->bitmap = bmp->bitmap_callbacks.bitmap_create(bmp->width, bmp->height, flags);
         if (!bmp->bitmap) {
                 if (bmp->colour_table)
-                        free(bmp->colour_table);
+                        ldg_Free(bmp->colour_table);
                 bmp->colour_table = NULL;
                 return BMP_INSUFFICIENT_MEMORY;
         }
@@ -460,7 +461,7 @@ static bmp_result ico_header_parse(ico_collection *ico, uint8_t *data)
          */
         for (i = 0; i < count; i++) {
                 ico_image *image;
-                image = calloc(1, sizeof(ico_image));
+                image = ldg_Calloc(1, sizeof(ico_image));
                 if (!image)
                         return BMP_INSUFFICIENT_MEMORY;
                 result = next_ico_image(ico, image);
@@ -1368,7 +1369,7 @@ void bmp_finalise(bmp_image *bmp)
                 bmp->bitmap_callbacks.bitmap_destroy(bmp->bitmap);
         bmp->bitmap = NULL;
         if (bmp->colour_table)
-                free(bmp->colour_table);
+                ldg_Free(bmp->colour_table);
         bmp->colour_table = NULL;
 }
 
@@ -1383,6 +1384,6 @@ void ico_finalise(ico_collection *ico)
         while (ico->first) {
                 image = ico->first;
                 ico->first = image->next;
-                free(image);
+                ldg_Free(image);
         }
 }
